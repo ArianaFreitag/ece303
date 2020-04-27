@@ -51,18 +51,18 @@ def rcvPacket(hashed_pkt):
     hash_check = h.update(string)
 
     if hash == hash_check:
-        return [0,0,0,0,0], num_pkt
+        sendAck(num)
+        return true, num_pkt, pkt
     else
-        return [255,255,255,255], num_pkt
+        sendNack()
+        return false
 
 
 
-def isAck (ack, num_pkt):
-
-
+def sendAck ():
 
     return
 
-def isNack(ack, num_pkt):
+def sendNack(ack, num_pkt):
 
     return
