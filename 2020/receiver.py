@@ -24,10 +24,13 @@ class Receiver(object):
 
 
 class BogoReceiver(Receiver):
-    ACK_DATA = bytes(123)
 
     def __init__(self):
         super(BogoReceiver, self).__init__()
+
+    def sendAck(self):
+        ACK_DATA = [255,255,255,255,255]
+        self.simulator
 
     def receive(self):
         self.logger.info("Receiving on port: {} and replying with ACK on port: {}".format(self.inbound_port, self.outbound_port))
@@ -36,7 +39,8 @@ class BogoReceiver(Receiver):
                  data = self.simulator.u_receive()  # receive data
                  self.logger.info("Got data from socket: {}".format(
                      data.decode('ascii')))  # note that ASCII will only decode bytes in the range 0-127
-	         sys.stdout.write(data)
+                 rcvPacket(data)
+                 sys.stdout.write(data)
                  self.simulator.u_send(BogoReceiver.ACK_DATA)  # send ACK
             except socket.timeout:
                 sys.exit()

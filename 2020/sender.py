@@ -20,6 +20,7 @@ class Sender(object):
         self.simulator.rcvr_setup(timeout)
 
     def send(self, data):
+
         raise NotImplementedError("The base API class has no implementation. Please override and add your own.")
 
 
@@ -44,5 +45,5 @@ class BogoSender(Sender):
 if __name__ == "__main__":
     # test out BogoSender
     DATA = bytearray(sys.stdin.read())
-    sndr = BogoSender()
+    sndr = Sender()
     sndr.send(DATA)
