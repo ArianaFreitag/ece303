@@ -1,6 +1,7 @@
 import datetime
 import logging
 import hashlib
+import some_utils
 
 
 class Logger(object):
@@ -25,35 +26,39 @@ def makePacket(pkt, num_pkt):
     pkt: byte array at fixed length containing the packet data
 
     returns:
-    flattened list containing num_pkt in index 1 and 2, hash in index #, and packet data till end
+    [[number of packer], [packet], [hash of packet]] where all data is in a bytearray
     '''
 
-    string = str(pkt)+str(num_pkt)
-    h = blake2b(digest_size=4)
-    hash = h.update(string)
+    num = bytearray(some_utils.data2asc([num_pkt]))
+    string = str(pkt)+str(num)
+    h = hashlib.md5()
+    h.update(string)
+    hash = h.digest()
+    hash = bytearray(hash)
 
-    hashed_pkt = num_pkt.extend(hash).extend(pkt)
+    hashed_pkt = [[num], [pkt], [hash]]
+
 
     # ENCODE USING REED SOLOMAN
-    encoded_pkt = rs.encode(hashed_pkt)
-    return encoded_pkt
+    # encoded_pkt = rs.encode(hashed_pkt)
+    return hashed_pkt
 
 def rcvPacket(hashed_pkt):
     # DECODE PACKET USING REED SOLOMAN
-    decoded_pkt = rs.decode(hashed_pkt)
+    # decoded_pkt = rs.decode(hashed_pkt)
 
     num_pkt = decoded_pkt[0:1]
     hash = decoded_pkt[2:5]
     pkt = decoded_pkt[6:]
 
     string = str(pkt)+str(num_pkt)
-    h = blake2b(digest_size=4)
+    h = hashlib.sha224()
     hash_check = h.update(string)
 
     if hash == hash_check:
         sendAck(num)
         return true, num_pkt, pkt
-    else
+    else:
         sendNack()
         return false
 
