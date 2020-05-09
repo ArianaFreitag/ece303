@@ -40,22 +40,24 @@ class Sender(object):
         print(list_packets)
 
 
+        packet_numbers = range(len(list_packets))
 
-        # loop through all of the data to make a list of packets
 
-        # self.logger.info("Sending on port: {} and waiting for ACK on port: {}".format(self.outbound_port, self.inbound_port))
-        # while True:
-        #     try:
-        #         self.simulator.u_send(data)  # send data
-        #         ack = self.simulator.u_receive()  # receive ACK
-        #         self.logger.info("Got ACK from socket: {}".format(
-        #             ack.decode('ascii')))  # note that ASCII will only decode bytes in the range 0-127
-        #         break
-        #     except socket.timeout:
-        #         pass
-        return 'true'
+        all_acks = False;
 
-        # raise NotImplementedError("The base API class has no implementation. Please override and add your own.")
+        while !all_acks:
+            for i in packet_numbers:
+                self.simulator.u_send(list_packets[i])
+                response = self.simulator.u_receive()
+                [pkt_num, ack_or_nak] = utils.receiveAck(response)
+                
+                if ack_or_nak:
+                    packet_numbers.remove(pkt_num)
+
+            if packet_numbers == []:
+                all_acks = True
+
+
 
 
 class BogoSender(Sender):

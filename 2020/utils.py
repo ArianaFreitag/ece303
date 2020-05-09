@@ -28,16 +28,21 @@ def makePacket(pkt, num_pkt):
     returns:
     [[number of packer], [packet], [hash of packet]] where all data is in a bytearray
     '''
+    
 
     num = bytearray(some_utils.data2asc([num_pkt]))
+
+    print ('num',num,type(num))
+
     string = str(pkt)+str(num)
     h = hashlib.md5()
     h.update(string)
     hash = h.digest()
     hash = bytearray(hash)
 
-    hashed_pkt = [[num], [pkt], [hash]]
+    
 
+    hashed_pkt = num + hash + pkt
 
     # ENCODE USING REED SOLOMAN
     # encoded_pkt = rs.encode(hashed_pkt)
@@ -57,17 +62,23 @@ def rcvPacket(hashed_pkt):
 
     if hash == hash_check:
         sendAck(num)
-        return true, num_pkt, pkt
+        return True, num_pkt, pkt
     else:
         sendNack()
-        return false
+        return False, num_pkt, pkt
 
 
 
 def sendAck ():
 
-    return
+    return 
 
 def sendNack(ack, num_pkt):
 
     return
+
+
+
+def recieveAck(ack):
+
+    return pkt_num, ack_or_nak
