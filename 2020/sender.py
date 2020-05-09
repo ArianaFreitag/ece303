@@ -7,6 +7,7 @@ import channelsimulator
 import utils
 import sys
 
+
 class Sender(object):
 
     def __init__(self, inbound_port=50006, outbound_port=50005, timeout=10, debug_level=logging.INFO):
@@ -20,8 +21,41 @@ class Sender(object):
         self.simulator.rcvr_setup(timeout)
 
     def send(self, data):
+        # make list of all the packets
+        list_packets = []
 
-        raise NotImplementedError("The base API class has no implementation. Please override and add your own.")
+        i = 0
+        num_pkt=0
+        packet_size = 10
+
+        while i < len(DATA) - packet_size:
+            new_data = utils.makePacket(data[i:i+packet_size], num_pkt)
+            i += packet_size
+            num_pkt += 1
+            list_packets.append(new_data)
+
+        # [[],[],[],...,[]]
+        list_packets.append(utils.makePacket(data[i:], num_pkt))
+
+        print(list_packets)
+
+
+
+        # loop through all of the data to make a list of packets
+
+        # self.logger.info("Sending on port: {} and waiting for ACK on port: {}".format(self.outbound_port, self.inbound_port))
+        # while True:
+        #     try:
+        #         self.simulator.u_send(data)  # send data
+        #         ack = self.simulator.u_receive()  # receive ACK
+        #         self.logger.info("Got ACK from socket: {}".format(
+        #             ack.decode('ascii')))  # note that ASCII will only decode bytes in the range 0-127
+        #         break
+        #     except socket.timeout:
+        #         pass
+        return 'true'
+
+        # raise NotImplementedError("The base API class has no implementation. Please override and add your own.")
 
 
 class BogoSender(Sender):
@@ -45,5 +79,18 @@ class BogoSender(Sender):
 if __name__ == "__main__":
     # test out BogoSender
     DATA = bytearray(sys.stdin.read())
+    DATA =DATA[0:100]
+
+
+
     sndr = Sender()
     sndr.send(DATA)
+
+    # MAKE THIS SKIP
+
+# print(msg[i:])
+#     left_over = len(DATA)%20
+#     while i < len(DATA)-20:
+#         data = makePacket(DATA[i:i+20])
+#         sndr.send(data)
+#         i=i+20
