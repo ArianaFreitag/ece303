@@ -43,3 +43,16 @@ def byte_error(data1, data2):
 		if data1[i] != data2[i]:
 			bits += 1
 	return [bits, bits/l]
+
+
+
+def hex2asc(hexStr):
+	bytes = []
+
+	hexStr = ''.join( hexStr.split(" ") )
+
+	for i in range(0, len(hexStr), 2):
+		bytes.append( chr( int (hexStr[i:i+2], 16 ) ) )
+
+	
+

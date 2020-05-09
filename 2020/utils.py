@@ -29,56 +29,66 @@ def makePacket(pkt, num_pkt):
     [[number of packer], [packet], [hash of packet]] where all data is in a bytearray
     '''
     
-
-    num = bytearray(some_utils.data2asc([num_pkt]))
-
-    print ('num',num,type(num))
-
-    string = str(pkt)+str(num)
-    h = hashlib.md5()
-    h.update(string)
-    hash = h.digest()
-    hash = bytearray(hash)
-
+    num_hex = format(num_pkt, '02x')
     
+    
+    pkt_and_num = num_hex + pkt
 
-    hashed_pkt = num + hash + pkt
+
+    h = hashlib.md5()
+    h.update(pkt_and_num)
+    hash = h.hexdigest()
+    hash = bytearray.fromhex(hash)
+
+    #print num_hex + hash + pkt
+    #print 'hash: ' + hash
 
     # ENCODE USING REED SOLOMAN
     # encoded_pkt = rs.encode(hashed_pkt)
-    return hashed_pkt
+    return num_hex + hash + pkt
 
 def rcvPacket(hashed_pkt):
     # DECODE PACKET USING REED SOLOMAN
     # decoded_pkt = rs.decode(hashed_pkt)
 
-    num_pkt = decoded_pkt[0:1]
-    hash = decoded_pkt[2:5]
-    pkt = decoded_pkt[6:]
 
-    string = str(pkt)+str(num_pkt)
-    h = hashlib.sha224()
-    hash_check = h.update(string)
+    num_pkt = hashed_pkt[0:2]
+    hash = hashed_pkt[2:18] # 16byte digest (32 hex, 128 bit)
+    pkt = hashed_pkt[18:]
+
+    pkt_and_num = num_pkt + pkt
+
+    h = hashlib.md5()
+    h.update(pkt_and_num)
+    hash_check = h.hexdigest()
+    hash_check = bytearray.fromhex(hash_check)
 
     if hash == hash_check:
-        sendAck(num)
         return True, num_pkt, pkt
     else:
-        sendNack()
         return False, num_pkt, pkt
 
 
 
-def sendAck ():
+def makeAck(num_pkt):
+    num_hex = format(num_pkt, '02x')
+    return bytearray(num_hex) + chr(255) + chr(255) + chr(255) + chr(255)
 
-    return 
-
-def sendNack(ack, num_pkt):
-
-    return
+def makeNack():
+    num_hex = format(num_pkt, '02x')
+    return bytearray(num_hex) + chr(0) + chr(0) + chr(0) + chr(0)
 
 
 
 def recieveAck(ack):
+    total = 0
+    for i in range(1,len(ack)):
+        total += ack[i]
+
+    if total > 400:
+        ack_or_nak = True
+    else:
+        ack_or_nak = False
+    pkt_num = ack[0:2]
 
     return pkt_num, ack_or_nak
