@@ -22,6 +22,14 @@ def asc2bit(data):
 		bits = bits + format(i,'08b')
 	return bits
 
+def asc2int(data):
+	print data
+	print type(data)
+	bits = ""
+	for i in data:
+		bits = bits + format(i,'08b')
+	return int(bits,2)
+
 
 def bit2asc(bits):
 	s = ""

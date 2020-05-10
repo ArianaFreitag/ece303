@@ -6,6 +6,7 @@ import socket
 import channelsimulator
 import utils
 import sys
+import some_utils
 
 
 class Sender(object):
@@ -41,21 +42,26 @@ class Sender(object):
 
 
         packet_numbers = range(len(list_packets))
-
+        print packet_numbers
 
         all_acks = False;
 
-        while !all_acks:
+        while ~all_acks:
             for i in packet_numbers:
-                self.simulator.u_send(list_packets[i])
-                response = self.simulator.u_receive()
-                [pkt_num, ack_or_nak] = utils.receiveAck(response)
-                
-                if ack_or_nak:
-                    packet_numbers.remove(pkt_num)
+                try:
+                    self.simulator.u_send(list_packets[i])
+                    response = self.simulator.u_receive()
+                    [pkt_num, ack_or_nak] = utils.rcvAck(response)
+                    
+                    if ack_or_nak:
+                        num = some_utils.asc2int(pkt_num)
+                        packet_numbers.remove(num)
+                except socket.timeout:
+                    pass
 
             if packet_numbers == []:
                 all_acks = True
+            print packet_numbers
 
 
 
@@ -81,7 +87,7 @@ class BogoSender(Sender):
 if __name__ == "__main__":
     # test out BogoSender
     DATA = bytearray(sys.stdin.read())
-    DATA =DATA[0:100]
+    DATA = DATA[0:1000]
 
 
 

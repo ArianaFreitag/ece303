@@ -20,7 +20,26 @@ class Receiver(object):
         self.simulator.sndr_setup(timeout)
 
     def receive(self):
-        raise NotImplementedError("The base API class has no implementation. Please override and add your own.")
+        all_data = {}
+
+        while True:
+            try:
+                rx = self.simulator.u_receive()
+
+                [not_corrupted, num_pkt, pkt] = utils.rcvPacket(rx)
+
+                if not_corrupted:
+                    all_data[str(num_pkt)] = pkt
+                    ack = utils.makeAck(num_pkt)
+                    self.simulator.u_send(ack)
+                else:
+                    nack = utils.makeNack(num_pkt)
+                    self.simulator.u_send(nack)
+            except socket.timeout:
+                sys.exit()
+
+        for i in all_data:
+            sys.stdout(i)
 
 
 class BogoReceiver(Receiver):
@@ -47,5 +66,7 @@ class BogoReceiver(Receiver):
 
 if __name__ == "__main__":
     # test out BogoReceiver
-    rcvr = BogoReceiver()
+    rcvr = Receiver()
     rcvr.receive()
+
+

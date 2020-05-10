@@ -29,10 +29,13 @@ def makePacket(pkt, num_pkt):
     [[number of packer], [packet], [hash of packet]] where all data is in a bytearray
     '''
     
-    num_hex = format(num_pkt, '02x')
+    num_hex = format(num_pkt, '08x')
+
+    num_byte = bytearray.fromhex(num_hex)
     
     
-    pkt_and_num = num_hex + pkt
+    
+    pkt_and_num = num_byte + pkt
 
 
     h = hashlib.md5()
@@ -40,21 +43,25 @@ def makePacket(pkt, num_pkt):
     hash = h.hexdigest()
     hash = bytearray.fromhex(hash)
 
+
+    
     #print num_hex + hash + pkt
     #print 'hash: ' + hash
 
     # ENCODE USING REED SOLOMAN
     # encoded_pkt = rs.encode(hashed_pkt)
-    return num_hex + hash + pkt
+    return num_byte + hash + pkt
+
+
 
 def rcvPacket(hashed_pkt):
     # DECODE PACKET USING REED SOLOMAN
     # decoded_pkt = rs.decode(hashed_pkt)
 
 
-    num_pkt = hashed_pkt[0:2]
-    hash = hashed_pkt[2:18] # 16byte digest (32 hex, 128 bit)
-    pkt = hashed_pkt[18:]
+    num_pkt = hashed_pkt[0:4]
+    hash = hashed_pkt[4:20] # 16byte digest (32 hex, 128 bit)
+    pkt = hashed_pkt[20:]
 
     pkt_and_num = num_pkt + pkt
 
@@ -71,24 +78,45 @@ def rcvPacket(hashed_pkt):
 
 
 def makeAck(num_pkt):
-    num_hex = format(num_pkt, '02x')
-    return bytearray(num_hex) + chr(255) + chr(255) + chr(255) + chr(255)
+    #num_hex = format(num_pkt, '08x')
+    #num_byte = bytearray.fromhex(num_hex)
 
-def makeNack():
-    num_hex = format(num_pkt, '02x')
-    return bytearray(num_hex) + chr(0) + chr(0) + chr(0) + chr(0)
+    pkt_and_num = num_pkt + chr(255)
+
+    h = hashlib.md5()
+    h.update(pkt_and_num)
+    hash = h.hexdigest()
+    hash = bytearray.fromhex(hash)
 
 
+    return num_pkt + hash
 
-def recieveAck(ack):
-    total = 0
-    for i in range(1,len(ack)):
-        total += ack[i]
+def makeNack(num_pkt):
+    #num_hex = format(num_pkt, '08x')
+    #num_byte = bytearray.fromhex(num_hex)
 
-    if total > 400:
-        ack_or_nak = True
+    pkt_and_num = num_pkt + chr(0)
+
+    h = hashlib.md5()
+    h.update(pkt_and_num)
+    hash = h.hexdigest()
+    hash = bytearray.fromhex(hash)
+
+
+    return num_pkt + hash
+
+def rcvAck(ack):
+    
+    pkt_num = ack[0:4]
+    hash = ack[4:]
+
+    h = hashlib.md5()
+    h.update(pkt_num + chr(255))
+    ack_hash = h.hexdigest()
+    ack_hash = bytearray.fromhex(ack_hash)
+
+
+    if hash == ack_hash:
+        return pkt_num, True
     else:
-        ack_or_nak = False
-    pkt_num = ack[0:2]
-
-    return pkt_num, ack_or_nak
+        return 0, False
