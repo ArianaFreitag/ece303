@@ -6,6 +6,7 @@ import channelsimulator
 import utils
 import sys
 import socket
+import some_utils
 
 class Receiver(object):
 
@@ -29,17 +30,24 @@ class Receiver(object):
                 [not_corrupted, num_pkt, pkt] = utils.rcvPacket(rx)
 
                 if not_corrupted:
-                    all_data[str(num_pkt)] = pkt
+                    num = some_utils.asc2int(num_pkt)
+                    if num == 0:
+                        break
+                    all_data[num] = pkt
                     ack = utils.makeAck(num_pkt)
                     self.simulator.u_send(ack)
                 else:
                     nack = utils.makeNack(num_pkt)
                     self.simulator.u_send(nack)
             except socket.timeout:
-                sys.exit()
+                pass
+     
+        #for i in all_data.values():
+         #   sys.stdout.write(i)
 
-        for i in all_data:
-            sys.stdout(i)
+
+        return(all_data)
+        
 
 
 class BogoReceiver(Receiver):
@@ -67,6 +75,12 @@ class BogoReceiver(Receiver):
 if __name__ == "__main__":
     # test out BogoReceiver
     rcvr = Receiver()
-    rcvr.receive()
+    test = rcvr.receive()
+
+    rx = ""
+    for i in test.values():
+        rx = rx + i
+    sys.stdout.write(rx)
+
 
 

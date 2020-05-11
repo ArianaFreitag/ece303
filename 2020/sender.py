@@ -23,48 +23,61 @@ class Sender(object):
 
     def send(self, data):
         # make list of all the packets
-        list_packets = []
+        list_packets = {}
 
         i = 0
-        num_pkt=0
-        packet_size = 10
+        num_pkt = 1
+        packet_size = 1000
 
         while i < len(DATA) - packet_size:
             new_data = utils.makePacket(data[i:i+packet_size], num_pkt)
             i += packet_size
+            list_packets[num_pkt] = new_data
             num_pkt += 1
-            list_packets.append(new_data)
+            
 
         # [[],[],[],...,[]]
-        list_packets.append(utils.makePacket(data[i:], num_pkt))
+        list_packets[num_pkt] = utils.makePacket(data[i:], num_pkt)
 
-        print(list_packets)
+        #print(list_packets)
 
 
-        packet_numbers = range(len(list_packets))
-        print packet_numbers
-
+        #packet_numbers = range(len(list_packets))
+        #print packet_numbers
         all_acks = False;
 
         while ~all_acks:
-            for i in packet_numbers:
+            for i in list_packets.values():
                 try:
-                    self.simulator.u_send(list_packets[i])
+                    self.simulator.u_send(i)
                     response = self.simulator.u_receive()
                     [pkt_num, ack_or_nak] = utils.rcvAck(response)
-                    
                     if ack_or_nak:
                         num = some_utils.asc2int(pkt_num)
-                        packet_numbers.remove(num)
+                        try:
+                            list_packets.pop(num)
+                        except KeyError:
+                            pass
                 except socket.timeout:
                     pass
 
-            if packet_numbers == []:
+            if list_packets == {}:
                 all_acks = True
-            print packet_numbers
+                break
+            #print packet_numbers
 
-
-
+        last_ack = False
+        fin_pkt = utils.makePacket(bytearray('00000000'),0)
+        while ~last_ack:
+            try:
+                self.simulator.u_send(fin_pkt)
+                response = self.simulator.u_receive()
+                [pkt_num, ack_or_nak] = utils.rcvAck(response)
+                if pkt_num == 0 & ack_or_nak:
+                    last_ack = True
+                    break
+            except socket.timeout:
+                pass
 
 class BogoSender(Sender):
 
@@ -87,7 +100,7 @@ class BogoSender(Sender):
 if __name__ == "__main__":
     # test out BogoSender
     DATA = bytearray(sys.stdin.read())
-    DATA = DATA[0:1000]
+    #DATA = DATA[0:20000]
 
 
 

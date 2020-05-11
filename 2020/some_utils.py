@@ -23,8 +23,6 @@ def asc2bit(data):
 	return bits
 
 def asc2int(data):
-	print data
-	print type(data)
 	bits = ""
 	for i in data:
 		bits = bits + format(i,'08b')

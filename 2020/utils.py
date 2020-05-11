@@ -81,7 +81,7 @@ def makeAck(num_pkt):
     #num_hex = format(num_pkt, '08x')
     #num_byte = bytearray.fromhex(num_hex)
 
-    pkt_and_num = num_pkt + chr(255)
+    pkt_and_num = num_pkt + chr(255) + chr(255) + chr(255) + chr(255)
 
     h = hashlib.md5()
     h.update(pkt_and_num)
@@ -95,7 +95,7 @@ def makeNack(num_pkt):
     #num_hex = format(num_pkt, '08x')
     #num_byte = bytearray.fromhex(num_hex)
 
-    pkt_and_num = num_pkt + chr(0)
+    pkt_and_num = num_pkt + chr(0) + chr(0) + chr(0) + chr(0)
 
     h = hashlib.md5()
     h.update(pkt_and_num)
@@ -111,7 +111,7 @@ def rcvAck(ack):
     hash = ack[4:]
 
     h = hashlib.md5()
-    h.update(pkt_num + chr(255))
+    h.update(pkt_num + chr(255) + chr(255) + chr(255) + chr(255))
     ack_hash = h.hexdigest()
     ack_hash = bytearray.fromhex(ack_hash)
 
